@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>HRLX CloudKit Authenticated Probe</title>
+  <style>
+    :root{color-scheme:dark; font-family:system-ui,-apple-system,sans-serif; background:#0d0d0e; color:white}
+    *{box-sizing:border-box}body{margin:auto;max-width:680px;padding:28px 18px 60px;line-height:1.7}
+    h1{font-size:1.65rem;margin:.5rem 0}h2{font-size:1.05rem}p,small{color:#aaa}
+    section{padding:20px;border-radius:18px;background:#1d1d20;margin:18px 0}
+    input{display:block;width:100%;background:#101012;border:1px solid #555;border-radius:10px;color:white;padding:14px;font-size:16px;margin:8px 0 12px;direction:ltr;text-align:left}
+    button{background:#2288fa;color:white;border:0;border-radius:10px;padding:12px 18px;font-size:1rem;font-weight:600;margin:5px 0;cursor:pointer}
+    button:disabled{opacity:.4;cursor:not-allowed}.secondary{background:#37383c}
+    #apple-sign-in-button,#apple-sign-out-button{margin:16px 0 6px;min-height:36px}
+    #status{background:#171719;border:1px solid #45464b;border-radius:12px;padding:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+    .warning{color:#f5c172}a{color:#8ac4ff}label{font-weight:600;font-size:.9rem}
+    :focus-visible{outline:3px solid #acd8ff;outline-offset:2px}
+  </style>
+</head>
+<body>
+  <header><h1>HRLX · CloudKit Auth Probe</h1><p>استخراج رابط CKAsset جديد ومصرّح به من قاعدة Private، بدون تنزيل الفيديو وبدون TestFlight.</p></header>
+  <section><h2>١. تهيئة الوصول الرسمي</h2>
+    <p>استخدم API Token الخاص بحاوية Cloud Lab، المقيّد بعنوان هذه الصفحة. لا تستخدم Server-to-Server Key.</p>
+    <label for="apiToken">CloudKit API Token</label>
+    <input type="password" id="apiToken" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="الصق الرمز على جهازك فقط">
+    <button type="button" id="configure">تهيئة CloudKit</button>
+    <p class="warning">لا تُدخل كلمة مرور Apple هنا. تسجيل الدخول يتم فقط من زر Apple الرسمي بعد التهيئة.</p>
+    <div id="apple-sign-in-button"></div><div id="apple-sign-out-button"></div>
+    <button type="button" class="secondary" id="checkAuth" disabled>تحقق من تسجيل الدخول</button>
+  </section>
+  <section><h2>٢. قراءة سجل الفيديو الحالي</h2>
+    <p>حاوية ثابتة: <code dir="ltr">iCloud.com.hrlx.cloudlab</code> · بيئة Development · قاعدة Private · حقل videoAsset.</p>
+    <label for="recordName">Record Name (من CloudKit Console)</label>
+    <input id="recordName" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="UUID الخاص بالسجل الحالي">
+    <button id="fetchRecord" type="button" disabled>جلب رابط جديد من Apple</button>
+    <button id="copyURL" type="button" class="secondary" disabled>نسخ رابط التنزيل إلى الحافظة محليًا</button>
+    <p>الرابط لا يُعرض ولا يُخزَّن ولا يدخل التقرير. بعد نسخه الصقه في Swift Playgrounds Range Probe الموجود عندك، بدل مشاركته.</p>
+  </section>
+  <section><h2>٣. التقرير الآمن</h2><div id="status" role="status" aria-live="polite">بانتظار التهيئة.</div>
+    <button type="button" id="copyReport" class="secondary">نسخ التقرير الآمن</button>
+    <button type="button" id="clear" class="secondary">مسح الرابط من الذاكرة</button>
+  </section>
+  <small>هذا فحص قراءة فقط: لا ينشئ ولا يحذف سجلات. يتطلب تشغيل الصفحة من موقع HTTPS مسموح في API Token. لا يعمل بمجرد فتح ملف HTML محلي داخل Files.</small>
+  <script src="https://cdn.apple-cloudkit.com/ck/2/CloudKit.js" defer></script>
+  <script src="./probe-core.js" defer></script>
+  <script src="./probe-ui.js" defer></script>
+</body></html>
