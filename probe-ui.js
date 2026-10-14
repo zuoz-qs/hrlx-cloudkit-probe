@@ -11,7 +11,12 @@
     "Container: iCloud.com.hrlx.cloudlab / development / private", stage, ...info].join("\n");
   const render = () => { $("status").textContent = report(); };
   const message = (s, items = []) => { stage = s; info = items; render(); };
-  const authFailure = (prefix, e) => message(prefix, ["Code: " + B.safeErrorCode(e),
+  // Apple CloudKit.CKError uses ckErrorCode; never display .reason, URLs or raw errors.
+  const safeCloudCode = e => {
+    const raw = e && (e.ckErrorCode || e.serverErrorCode || e.errorCode || e.code);
+    return typeof raw === "string" && /^[A-Za-z_0-9-]{1,64}$/.test(raw) ? raw : "غير محدد";
+  };
+  const authFailure = (prefix, e) => message(prefix, ["Code: " + safeCloudCode(e),
     "لا تُرسل رموز أو روابط أو الرسالة الخام للخطأ."]);
   function eraseURL() { signedURL = null; $("copyURL").disabled = true; }
   async function checkAuth() {
@@ -70,8 +75,17 @@
     try {
       const response = await container.privateCloudDatabase.fetchRecords(recordID,
         {zoneID:"_defaultZone",desiredKeys:["videoAsset"]});
-      if (response.hasErrors || !response.records || response.records.length !== 1) {
-        throw {code: "RECORD_FETCH_FAILED"};
+      // Expose the safe native error code instead of masking it as RECORD_FETCH_FAILED.
+      if (response.hasErrors) {
+        throw Array.isArray(response.errors) && response.errors.length
+          ? response.errors[0]
+          : {code:"RECORD_ERRORS_WITHOUT_DETAILS"};
+      }
+      if (!Array.isArray(response.records)) {
+        throw {code:"RECORDS_RESPONSE_MALFORMED"};
+      }
+      if (response.records.length !== 1) {
+        throw {code:response.records.length === 0 ? "RECORD_NOT_RETURNED" : "RECORD_COUNT_UNEXPECTED"};
       }
       const record = response.records[0];
       if (record.recordType !== "HRLXStreamProbe" || record.recordName !== recordID) {
